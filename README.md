@@ -1,5 +1,10 @@
 # React-shop-cloudfront
 
+## Links
+
+- [S3 Bucket](http://aws-store-react-app.s3-website-us-east-1.amazonaws.com)
+- [CloudFront](https://d2v281bl4sw4xr.cloudfront.net)
+
 This is frontend starter project for nodejs-aws mentoring program. It uses the following technologies:
 
 - [Vite](https://vitejs.dev/) as a project bundler
