@@ -16,6 +16,14 @@
     "browser": true,
     "node": true
   },
+  "rules": {
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto"
+      }
+    ]
+  },
   "settings": {
     "react": {
       "version": "detect"
