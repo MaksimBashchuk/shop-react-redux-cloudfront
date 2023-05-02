@@ -7,10 +7,30 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { theme } from "~/theme";
+import { ToastContainer, toast } from "react-toastify";
+import { AxiosError } from "axios";
+import { HTTP_ERRORS } from "./constants/httpErrors";
+import "react-toastify/dist/ReactToastify.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { refetchOnWindowFocus: false, retry: false, staleTime: Infinity },
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
+      staleTime: Infinity,
+      onError: (error) => {
+        if (error instanceof AxiosError) {
+          const statusCode = error.response?.status;
+
+          if (statusCode && HTTP_ERRORS[statusCode]) {
+            const message = `${statusCode} - ${HTTP_ERRORS[statusCode]}: ${error.response?.data.message}`;
+            return toast.error(message);
+          }
+        }
+
+        return Promise.reject(error);
+      },
+    },
   },
 });
 
@@ -29,6 +49,7 @@ root.render(
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <App />
+          <ToastContainer style={{ width: "fit-content" }} />
         </ThemeProvider>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>

@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, AxiosRequestHeaders } from "axios";
 import API_PATHS from "~/constants/apiPaths";
 import { AvailableProduct } from "~/models/Product";
 import { useQuery, useQueryClient, useMutation } from "react-query";
@@ -11,6 +11,39 @@ export function useAvailableProducts() {
       const res = await axios.get<AvailableProduct[]>(API_PATHS.products);
       return res.data;
     }
+  );
+}
+
+export function usePresignedPost(url: string, name = "") {
+  const storedToken = localStorage.getItem("authorization_token");
+  const headers: AxiosRequestHeaders = {};
+
+  if (storedToken) {
+    headers["Authorization"] = `Basic ${storedToken}`;
+  }
+
+  return useQuery(
+    "presigned-url",
+    async () => {
+      const res = await axios.get(url, {
+        params: {
+          name: encodeURIComponent(name),
+        },
+        headers,
+      });
+      return res.data;
+    },
+    { enabled: false }
+  );
+}
+
+export function useUploadProductsFile() {
+  return useMutation((variables: { postUrl: string; formData: FormData }) =>
+    axios.post(variables.postUrl, variables.formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
   );
 }
 

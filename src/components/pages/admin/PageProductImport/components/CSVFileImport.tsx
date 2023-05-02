@@ -1,7 +1,7 @@
 import React from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import axios from "axios";
+import { usePresignedPost, useUploadProductsFile } from "~/queries/products";
 
 type CSVFileImportProps = {
   url: string;
@@ -10,6 +10,8 @@ type CSVFileImportProps = {
 
 export default function CSVFileImport({ url, title }: CSVFileImportProps) {
   const [file, setFile] = React.useState<File | null>(null);
+  const { refetch: getPresignedPost } = usePresignedPost(url, file?.name);
+  const { mutateAsync: uploadProductsFile } = useUploadProductsFile();
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -29,13 +31,7 @@ export default function CSVFileImport({ url, title }: CSVFileImportProps) {
     // Get the presigned URL
     const {
       data: { url: postUrl, fields },
-    } = await axios({
-      method: "GET",
-      url,
-      params: {
-        name: encodeURIComponent(file ? file.name : ""),
-      },
-    });
+    } = await getPresignedPost();
 
     console.log("File: ", file);
     console.log("File to upload: ", file?.name);
@@ -51,10 +47,9 @@ export default function CSVFileImport({ url, title }: CSVFileImportProps) {
       formData.append("file", file);
     }
 
-    const result = await axios.post(postUrl, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    const result = await uploadProductsFile({
+      formData,
+      postUrl: postUrl,
     });
     console.log("Result: ", result);
     setFile(null);
