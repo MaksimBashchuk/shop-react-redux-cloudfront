@@ -1,14 +1,27 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import React from "react";
 import { useQuery, useQueryClient, useMutation } from "react-query";
 import API_PATHS from "~/constants/apiPaths";
 import { OrderStatus } from "~/constants/order";
 import { Order } from "~/models/Order";
 
+type ApiResponse<T> = {
+  statusCode: string;
+  data: T;
+  message: string;
+};
+
 export function useOrders() {
-  return useQuery<Order[], AxiosError>("orders", async () => {
-    const res = await axios.get<Order[]>(`${API_PATHS.order}/order`);
-    return res.data;
+  return useQuery("orders", async () => {
+    const res = await axios.get<ApiResponse<Order[]>>(
+      `${API_PATHS.order}/order`,
+      {
+        headers: {
+          Authorization: `Basic ${localStorage.getItem("authorization_token")}`,
+        },
+      }
+    );
+    return res.data.data;
   });
 }
 
